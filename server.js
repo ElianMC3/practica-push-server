@@ -16,7 +16,32 @@ if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
   process.exit(1);
 }
 
-webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+// Diagnóstico: ayuda a detectar claves mal copiadas sin revelar su contenido.
+function describeKey(name, value, expectedBytes) {
+  const clean = value.trim().replace(/^['"]|['"]$/g, '');
+  const bytes = Buffer.from(clean, 'base64url').length;
+  const state = bytes === expectedBytes ? 'OK' : 'INCORRECTA';
+  console.log(
+    `[push] ${name}: ${clean.length} caracteres, ${bytes} bytes (esperado ${expectedBytes}) → ${state}`,
+  );
+  return { clean, ok: bytes === expectedBytes };
+}
+
+const publicKey = describeKey('VAPID_PUBLIC_KEY', VAPID_PUBLIC_KEY, 65);
+const privateKey = describeKey('VAPID_PRIVATE_KEY', VAPID_PRIVATE_KEY, 32);
+
+if (!publicKey.ok || !privateKey.ok) {
+  console.error(
+    '[push] Revisa las variables de entorno: la clave privada son 43 caracteres y la pública 87.',
+  );
+  process.exit(1);
+}
+
+if (VAPID_PRIVATE_KEY !== privateKey.clean) {
+  console.warn('[push] La clave privada tenía espacios o comillas; se usó la versión limpia.');
+}
+
+webpush.setVapidDetails(VAPID_SUBJECT, publicKey.clean, privateKey.clean);
 
 const app = express();
 const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',')
