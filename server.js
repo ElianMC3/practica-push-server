@@ -44,11 +44,9 @@ if (VAPID_PRIVATE_KEY !== privateKey.clean) {
 webpush.setVapidDetails(VAPID_SUBJECT, publicKey.clean, privateKey.clean);
 
 const app = express();
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean);
 
-app.use(cors(allowedOrigins?.length ? { origin: allowedOrigins } : undefined));
+// CORS abierto: cualquier origen puede llamar a la API.
+app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '256kb' }));
 
 /** @type {Array<{ endpoint: string, expirationTime?: number | null, keys: { p256dh: string, auth: string } }>} */

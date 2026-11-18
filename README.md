@@ -106,7 +106,6 @@ El `.gitignore` del proyecto excluye `node_modules`, `.env` y `data/`.
    | `VAPID_PUBLIC_KEY` | tu clave pública |
    | `VAPID_PRIVATE_KEY` | tu clave privada |
    | `VAPID_SUBJECT` | `mailto:tu-correo@ejemplo.com` |
-   | `ALLOWED_ORIGINS` | opcional: `http://localhost:4200,https://tu-pwa.onrender.com` |
 
    No definas `PORT`: Render lo inyecta.
 
@@ -160,4 +159,9 @@ Si falla, en DevTools → **Application** → **Service Workers** usa
 - El endpoint `/api/push` es público: cualquiera con la URL puede lanzar
   notificaciones. Para una práctica es aceptable; para producción añade un
   token (`Authorization: Bearer ...`) y envíalo desde la PWA.
+- **CORS abierto**: la API responde `Access-Control-Allow-Origin: *`, así que
+  cualquier origen puede llamarla. Es lo que se quiere para probar desde
+  `localhost`, Netlify, Vercel, GitHub Pages, etc. Si algún día necesitas
+  restringirlo, cambia `app.use(cors({ origin: '*' }))` en `server.js` por una
+  lista de orígenes permitidos.
 - Render sirve HTTPS automáticamente, requisito de Web Push.
